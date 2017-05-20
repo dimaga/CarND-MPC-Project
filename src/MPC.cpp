@@ -258,8 +258,6 @@ std::vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   const std::size_t predicted_idx = std::min(
     std::size_t(predicted_latency / kDt + 0.5), kN - 2);
 
-  std::cout << "predicted_idx == " << predicted_idx << std::endl;
-
   return {solution.x[kStartDelta + predicted_idx],
           solution.x[kStartA + predicted_idx]};
 }
