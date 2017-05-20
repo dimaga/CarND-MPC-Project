@@ -35,14 +35,6 @@ namespace {
     return "";
   }
 
-  // Evaluate a polynomial.
-  double polyeval(Eigen::VectorXd coeffs, double x) {
-    double result = 0.0;
-    for (int i = 0; i < coeffs.size(); i++) {
-      result += coeffs[i] * pow(x, i);
-    }
-    return result;
-  }
 
   // Fit a polynomial.
   // Adapted from
@@ -131,7 +123,7 @@ int main() {
 
           // Since we are working in the local reference frame of the car,
           // px, py and psi are zero
-          const double cte = polyeval(coeffs, 0);
+          const double cte = coeffs[0];
           const double ecte = -std::atan(coeffs[1]);
 
           Eigen::VectorXd state(6);
