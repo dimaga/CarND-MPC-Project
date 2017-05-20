@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cppad/cppad.hpp>
 #include <cppad/ipopt/solve.hpp>
+#include <chrono>
 #include "Eigen-3.3/Eigen/Core"
 
 using CppAD::AD;
@@ -147,6 +148,8 @@ MPC::MPC() {}
 MPC::~MPC() {}
 
 std::vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
+  const auto start_timepoint = std::chrono::system_clock::now();
+
   bool ok = true;
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
@@ -247,9 +250,15 @@ std::vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
 
-  const double predicted_latency = 0.1;
-  const int predicted_idx = predicted_latency / kDt;
-  assert(predicted_idx < kN - 1);
+  const std::chrono::duration<double, std::ratio<1, 1>> duration =
+    std::chrono::system_clock::now() - start_timepoint;
+
+  const double predicted_latency = 0.1 + duration.count();
+
+  const std::size_t predicted_idx = std::min(
+    std::size_t(predicted_latency / kDt + 0.5), kN - 2);
+
+  std::cout << "predicted_idx == " << predicted_idx << std::endl;
 
   return {solution.x[kStartDelta + predicted_idx],
           solution.x[kStartA + predicted_idx]};
