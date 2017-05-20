@@ -132,7 +132,7 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
-          const double steer_value = actuators.at(0);
+          const double steer_value = -actuators.at(0);
           const double throttle_value = actuators.at(1);
 
           json msg_json;

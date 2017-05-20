@@ -91,8 +91,11 @@ class FG_eval {
     }
 
     for (std::size_t i = 0; i < kN - 2; ++i) {
-      fg[0] += CppAD::pow(vars[kStartDelta + i + 1] - vars[kStartDelta + i], 2);
-      fg[0] += CppAD::pow(vars[kStartA + i + 1] - vars[kStartA + i], 2);
+      fg[0] += 500 * CppAD::pow(vars[kStartDelta + i + 1]
+                                - vars[kStartDelta + i], 2);
+
+      fg[0] += CppAD::pow(vars[kStartA + i + 1]
+                          - vars[kStartA + i], 2);
     }
 
     fg[1 + kStartX] = vars[kStartX];
@@ -233,9 +236,21 @@ std::vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // Check some of the solution values
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
 
+  x_vals_.clear();
+  y_vals_.clear();
+  for (std::size_t i = 0; i < kN; ++i) {
+    x_vals_.push_back(solution.x[kStartX + i]);
+    y_vals_.push_back(solution.x[kStartY + i]);
+  }
+
   // Cost
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
 
-  return {-solution.x[kStartDelta], solution.x[kStartA]};
+  const double predicted_latency = 0.1;
+  const int predicted_idx = predicted_latency / kDt;
+  assert(predicted_idx < kN - 1);
+
+  return {solution.x[kStartDelta + predicted_idx],
+          solution.x[kStartA + predicted_idx]};
 }
