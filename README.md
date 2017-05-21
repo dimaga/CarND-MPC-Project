@@ -42,10 +42,10 @@ MPC controller traces the state of the car into the future, trying to minimize t
 
 ### Timestep Length and Dt
 
-In my case, default values, presented during the lab, showed best results. Other values result in stability problems.
+In my case, default values, presented in MPC lab solution (N = 25, dt = 0.01), showed best results. Other values result in stability problems.
 
-Increasing planning horizon by bigger timestep length (kN in MPC.cpp) or smaller update period (kDt) leads to the following drawbacks:
-* Longer fitting time, which adds up additional latency to the controller and causes stability problems
+Increasing planning horizon by longer timestep length (kN in MPC.cpp) or smaller update period (kDt) leads to the following issues:
+* Longer fitting time, which adds up additional latency to the controller and causes stability problems. I tried to compensate that by measuring performance of my mps Solver() and adding it to the overall latency, see std::chrono usage in MPC::Solve() code of MPC.cpp
 * Additional degrees of freedom for the planning problem (higher "variance", "overfitting"). The planning path may introduce circular motion, intersecting road ledges and other parts of the environment - cost function does not fine controller for crossing obstacles
 * Update rate of the simulator may not correspond to update rate of the controlling application, which leads to different physics of the car
 
@@ -55,4 +55,12 @@ Decreasing update period (kDt) leads to too coarse planning route, not fully rep
 
 ### Polynomial Fitting
 
+Since MPC controller is implemented via ipopt(), minimizing sum of squared errors cost function with respect to some parameters, it is convenient to represent desired trajectory by a differentiable polynomial. I used cubic polynomial, presented in MPC lab, and implemented in MPC.cpp.
+
+The polynomial is parametrized by x coordinate, and returns y coordinate. Therefore, referenced trajectory waypoints given in map coordinates are first transformed into car local reference frame, where X-axes points forward in longitudal direction of the car, and Y-axes points in the lateral direction. This also simplifies calculation of cross-track-error (take y-coordinate in the local reference frame of the car) and epsi (take atan() of the polynomial derivative). 
+
 ### Model Predictive Control with Latency
+
+Model Predictive Controller builds the track of future states of the car, optimizing cost function by selecting appropriate actuator values along the way. In order to compensate the latency, I return to the simulator actuator commands from the middle of the track, corresponding to the latency timestamp.
+
+The latency compensation is implemented in the end of MPC::Solve() method, in MPC.cpp. It takes into account both constant latency (0.1 seconds) and varying latency caused by MPC solver and measured by std::chrono timers.
