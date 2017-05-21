@@ -19,3 +19,10 @@ To enforce [Google's C++ style guide](https://google.github.io/styleguide/cppgui
 
 ## Rubric Points
 
+### The Model
+
+### Timestep Length and Frequency
+
+### Polynomial Fitting
+
+### Model Predictive Control with Latency
