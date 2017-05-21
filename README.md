@@ -21,7 +21,28 @@ To enforce [Google's C++ style guide](https://google.github.io/styleguide/cppgui
 
 ### The Model
 
+MPC controller uses simplified Kinematic bicycle model, presented at course lectures and implemented in FG_eval::operator() method of MPC.cpp. The following formulae are applied:
+
+```
+psi_offset = velocity / Lf * steering * dt
+x1 = x0 + v0 * cos(psi0) * dt
+y1 = y0 + v0 * sin(psi0) * dt
+psi1 = norm_pi(psi0 + psi_offset)
+v1 = v0 + throttle * dt
+```
+
+where dt is timestep in seconds, (x, y) are 2D coordinates of the car, psi is the orientation of the car in radians, Lf distance from the car center of mass to front wheels, norm_pi() normalizes the angle to keep it in the range of [-pi, pi].
+
+MPC controller traces the state of the car into the future, trying to minimize the cost function, consisting of sum of:
+* squared cross track error - distance between car position and the closes point on the lane center
+* squared epsi - difference in direction of the tangent of the closest point of the lane center and the car
+* squared difference between desired and actual linear velocity to move the car forward
+* squared actuator commands to keep them small
+* squared difference between consecutive actuator commands to keep them constant
+
 ### Timestep Length and Frequency
+
+
 
 ### Polynomial Fitting
 
