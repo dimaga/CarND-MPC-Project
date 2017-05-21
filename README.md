@@ -33,12 +33,12 @@ v1 = v0 + throttle * dt
 
 where dt is timestep in seconds, (x, y) are 2D coordinates of the car, psi is the orientation of the car in radians, Lf distance from the car center of mass to front wheels, norm_pi() normalizes the angle to keep it in the range of [-pi, pi].
 
-MPC controller traces the state of the car into the future, trying to minimize the cost function, consisting of sum of:
-* squared cross track error - distance between car position and the closest point on the lane center
-* squared epsi - difference in direction of the tangent of the closest point of the lane center and the car
-* squared difference between desired and actual linear velocity to move the car forward
-* squared actuator commands to keep them small
-* squared difference between consecutive actuator commands to keep them constant
+MPC controller traces the state of the car into the future, trying to minimize the cost function, consisting of sum of weighted squares of:
+* cross track errors - distances between car position and the closest point on the lane center
+* epsi - differences in radians between the tangent of the closest point of the lane center and the car forward direction
+* differences between desired and actual linear velocity to move the car forward
+* actuators commands to keep their absolute values small
+* differences between consecutive actuator commands to keep them varying smoothly
 
 ### Timestep Length and Dt
 
