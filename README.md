@@ -40,9 +40,18 @@ MPC controller traces the state of the car into the future, trying to minimize t
 * squared actuator commands to keep them small
 * squared difference between consecutive actuator commands to keep them constant
 
-### Timestep Length and Frequency
+### Timestep Length and Dt
 
+In my case, default values, presented during the lab, showed best results. Other values result in stability problems.
 
+Increasing planning horizon by bigger timestep length (kN in MPC.cpp) or smaller update period (kDt) leads to the following drawbacks:
+* Longer fitting time, which adds up additional latency to the controller and causes stability problems
+* Additional degrees of freedom for the planning problem (higher "variance", "overfitting"). The planning path may introduce circular motion, intersecting road ledges and other parts of the environment - cost function does not fine controller for crossing obstacles
+* Update rate of the simulator may not correspond to update rate of the controlling application, which leads to different physics of the car
+
+Decreasing timestep length results in insufficient planning or horizon, not covering latency values.
+
+Decreasing update period (kDt) leads to too coarse planning route, not fully representing the physics of the car
 
 ### Polynomial Fitting
 
