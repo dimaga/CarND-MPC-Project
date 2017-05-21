@@ -65,11 +65,11 @@ namespace {
     const double sin_psi = std::sin(psi);
 
     for (std::size_t i = 0, count = ptsx->size(); i < count; ++i) {
-      const double ox = ptsx->at(i);
-      const double oy = ptsy->at(i);
+      const double ox = ptsx->at(i) - px;
+      const double oy = ptsy->at(i) - py;
 
-      ptsx->at(i) = (ox - px) * cos_psi + (oy - py) * sin_psi;
-      ptsy->at(i) = -(ox - px) * sin_psi + (oy - py) * cos_psi;
+      ptsx->at(i) = ox * cos_psi + oy * sin_psi;
+      ptsy->at(i) = -ox * sin_psi + oy * cos_psi;
     }
   }
 }  // namespace
@@ -107,13 +107,8 @@ int main() {
 
           const int order = std::min<int>(3, ptsx.size() - 1);
 
-          Eigen::VectorXd v_ptsx(ptsx.size());
-          Eigen::VectorXd v_ptsy(ptsy.size());
-          for (std::size_t i = 0, size = ptsx.size(); i < size; ++i) {
-            v_ptsx[i] = ptsx.at(i);
-            v_ptsy[i] = ptsy.at(i);
-          }
-
+          const Eigen::Map<Eigen::VectorXd> v_ptsx(ptsx.data(), ptsx.size());
+          const Eigen::Map<Eigen::VectorXd> v_ptsy(ptsy.data(), ptsy.size());
           const Eigen::VectorXd coeffs = polyfit(v_ptsx, v_ptsy, order);
 
           // Since we are working in the local reference frame of the car,
