@@ -55,7 +55,7 @@ Decreasing update period (kDt) leads to too coarse planning route, not fully rep
 
 ### Polynomial Fitting
 
-Since MPC controller is implemented via ipopt(), minimizing sum of squared errors cost function with respect to some parameters, it is convenient to represent desired trajectory by a differentiable polynomial. I used cubic polynomial, presented in MPC lab, and implemented in MPC.cpp.
+Since MPC controller is implemented via ipopt(), minimizing sum of squared errors cost function with respect to some parameters, it is convenient to represent desired trajectory by a differentiable polynomial. I used a cubic polynomial, presented in MPC lab. The fitting procedure is implemented in polyfit() function of main.cpp and sampling methods for polynomial values and its first derivative are implemented in polyeval() and polyeval_deriv() of MPC.cpp module correspondingly.
 
 The polynomial is parametrized by x coordinate, and returns y coordinate. Therefore, referenced trajectory waypoints given in map coordinates are first transformed into car local reference frame, where X-axes points forward in longitudal direction of the car, and Y-axes points in the lateral direction. This also simplifies calculation of cross-track-error (take y-coordinate in the local reference frame of the car) and epsi (take atan() of the polynomial derivative). 
 
