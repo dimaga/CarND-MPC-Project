@@ -44,12 +44,15 @@ MPC controller traces the state of the car into the future, trying to minimize t
 
 In my case, default values, presented in MPC lab solution (N = 25, dt = 0.01), showed best results. Other values result in stability problems.
 
-Increasing planning horizon by longer timestep length (kN in MPC.cpp) or smaller update period (kDt) leads to the following issues:
-* Longer fitting time, which adds up additional latency to the controller and causes stability problems. I tried to compensate that by measuring performance of my mps Solver() and adding it to the overall latency, see std::chrono usage in MPC::Solve() code of MPC.cpp
-* Additional degrees of freedom for the planning problem (higher "variance", "overfitting"). The planning path may introduce circular motion, intersecting road ledges and other parts of the environment - cost function does not fine controller for crossing obstacles
+Increasing planning horizon by longer timestep length (kN in MPC.cpp) or smaller update period (kDtin MPC.cpp) leads to the following issues:
+
+* Longer fitting time, which adds up additional latency to the controller and causes stability problems. I tried to compensate that by measuring performance of my MPC solver and adding it to the overall latency (see std::chrono usage in MPC::Solve() code of MPC.cpp)
+
+* Additional degrees of freedom for the planning problem (higher "variance" or "overfitting"). In some extreme cases, the planning path may suggest circular motion, arbitrarily intersecting road ledges and other parts of the environment, since my cost function does not fine controller for crossing obstacles
+
 * Update rate of the simulator may not correspond to update rate of the controlling application, which leads to different physics of the car
 
-Decreasing timestep length results in insufficient planning or horizon, not covering latency values.
+Decreasing timestep length results in insufficient planning or horizon, not covering latency values or ways to reach referenced trajectory.
 
 Decreasing update period (kDt) leads to too coarse planning route, not fully representing the physics of the car
 
@@ -57,7 +60,7 @@ Decreasing update period (kDt) leads to too coarse planning route, not fully rep
 
 Since MPC controller is implemented via ipopt(), minimizing sum of squared errors cost function with respect to some parameters, it is convenient to represent desired trajectory by a differentiable polynomial. I used a cubic polynomial, presented in MPC lab. The fitting procedure is implemented in polyfit() function of main.cpp and sampling methods for polynomial values and its first derivative are implemented in polyeval() and polyeval_deriv() of MPC.cpp module correspondingly.
 
-The polynomial is parametrized by x coordinate, and returns y coordinate. Therefore, referenced trajectory waypoints given in map coordinates are first transformed into car local reference frame, where X-axes points forward in longitudal direction of the car, and Y-axes points in the lateral direction. This also simplifies calculation of cross-track-error (take y-coordinate in the local reference frame of the car) and epsi (take atan() of the polynomial derivative). 
+The polynomial is parametrized by x coordinate, and returns y coordinate. For convenience and to minimize chances of degenerate cases (such as infinite tangents), referenced trajectory waypoints given in map coordinates are first transformed into car local reference frame, where X-axes points forward in longitudal direction of the car, and Y-axes points in the lateral direction. This also simplifies calculation of cross-track-error (take y-coordinate in the local reference frame of the car) and epsi (take atan() of the polynomial derivative). 
 
 ### Model Predictive Control with Latency
 
